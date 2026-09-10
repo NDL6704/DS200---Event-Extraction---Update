@@ -60,15 +60,23 @@ Hệ thống áp dụng kiến trúc **Joint Learning (OneIE-based)** nhằm gi�
 
 4. **Event Type Classifier (Sequence-level Classification)**:
    - Kiến trúc: `Dropout(0.1) -> Linear(768, 384) -> ReLU() -> Dropout(0.1) -> Linear(384, 14)`
-   - Nhận đầu vào là vector đại diện toàn câu $\mathbf{h}_{\text{CLS}}$.
+   - Nhận đầu vào là vector đại diện toàn câu `h_CLS` (CLS token representation).
    - Phân loại câu vào một trong 14 nhóm sự kiện chính trị (Celebration, Commemoration, Condolence, Cooperation, Diplomatic Reception, Government Formation, Inspection, Legislation, Meeting, Proposal, Publication, Recognition, Statement, Visiting).
 
 5. **Hàm mất mát liên kết (Weighted Multi-Task Loss)**:
-   - Huấn luyện kết hợp 3 nhánh mục tiêu:
-     $$\mathcal{L}_{\text{total}} = 0.4 \times \mathcal{L}_{\text{trigger}} + 0.3 \times \mathcal{L}_{\text{argument}} + 0.3 \times \mathcal{L}_{\text{event}}$$
+   - Huấn luyện kết hợp 3 nhánh mục tiêu thông qua hàm mất mát tổng hợp:
+
+   ```math
+   \mathcal{L}_{\text{total}} = 0.4 \times \mathcal{L}_{\text{trigger}} + 0.3 \times \mathcal{L}_{\text{argument}} + 0.3 \times \mathcal{L}_{\text{event}}
+   ```
+
    - **Xử lý mất cân bằng lớp (Class Imbalance)**: Do nhãn `O` chiếm đa số (~95% lượng token), hàm mất mát sử dụng kỹ thuật tính trọng số nghịch đảo căn bậc hai tần suất (`calculate_class_weights`):
-     $$w_c = \frac{1}{\sqrt{N_c}} \times \frac{C}{\sum_j \frac{1}{\sqrt{N_j}}}$$
-     giúp mô hình học hiệu quả các thẻ Trigger và Argument có tần suất thấp.
+
+   ```math
+   w_c = \frac{1}{\sqrt{N_c}} \times \frac{C}{\sum_{j=1}^{C} \frac{1}{\sqrt{N_j}}}
+   ```
+
+   giúp mô hình học hiệu quả các thẻ Trigger và Argument có tần suất xuất hiện thấp.
 
 6. **Cơ chế căn chỉnh Subword (Subword-to-Word Alignment)**:
    - Sử dụng `word_ids()` của `XLMRobertaTokenizerFast` để ánh xạ chính xác kết quả dự đoán của các subword về từng từ token gốc, loại bỏ sai lệch độ dài khi xuất dữ liệu JSON.
@@ -117,7 +125,7 @@ DS200/
 │   ├── legacy_data/                      # Du lieu crawl tho & bang tinh trung gian cu
 │   └── docs/                             # Bao cao PDF & slides do an
 │
-├── docker-compose.yml                    # Cum Kafka Broker, Zookeeper, Kafka UI (Port 8080)
+├── docker-compose.yml                    # Cum Kafka Broker (Port 9092) va Zookeeper (Port 2181)
 ├── requirements.txt                      # Dependencies cho toan bo du an
 └── README.md
 ```
@@ -137,7 +145,6 @@ docker compose up -d
 ```
 - **Kafka Broker**: `localhost:9092`
 - **Zookeeper**: `localhost:2181`
-- **Kafka Web UI**: [http://localhost:8080](http://localhost:8080)
 
 ### Bước 3: Huấn luyện mô hình (Tùy chọn)
 ```powershell

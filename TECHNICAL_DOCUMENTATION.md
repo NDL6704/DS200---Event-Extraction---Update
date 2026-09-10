@@ -121,7 +121,10 @@ Dự án triển khai mô hình **JointModel** lấy cảm hứng từ cấu tr�
 
 ### 4.1. Hàm mất mát liên kết đa nhiệm (Joint Multi-Task Loss)
 Hệ thống kết hợp ba hàm mất mát thành phần với trọng số tối ưu thực nghiệm:
-$$\mathcal{L}_{\text{total}} = 0.4 \times \mathcal{L}_{\text{trigger}} + 0.3 \times \mathcal{L}_{\text{arg}} + 0.3 \times \mathcal{L}_{\text{event}}$$
+
+```math
+\mathcal{L}_{\text{total}} = 0.4 \times \mathcal{L}_{\text{trigger}} + 0.3 \times \mathcal{L}_{\text{arg}} + 0.3 \times \mathcal{L}_{\text{event}}
+```
 
 Trong đó:
 * $\mathcal{L}_{\text{trigger}}$ và $\mathcal{L}_{\text{arg}}$ là Cross-Entropy Loss tính trên các token hợp lệ (loại trừ padding với `ignore_index = -100`).
@@ -130,8 +133,12 @@ Trong đó:
 ### 4.2. Giải quyết vấn đề mất cân bằng lớp cực đoan (Severe Class Imbalance)
 * **Thực trạng**: Trong tác vụ trích xuất thực thể, hơn 95% token trong văn bản mang nhãn `O` (Outside). Các nhãn quan trọng như `B-Arg-Time`, `B-Legislation` chỉ chiếm dưới 1%. Nếu huấn luyện thông thường, mô hình sẽ tối ưu cục bộ bằng cách dự đoán tất cả là `O`, dẫn đến F1-score của các thực thể gần bằng 0.
 * **Giải pháp**: Áp dụng kỹ thuật tính trọng số nghịch đảo căn bậc hai tần suất xuất hiện (`calculate_class_weights`):
-  $$w_c = \frac{1}{\sqrt{N_c}} \times \frac{C}{\sum_{j=1}^{C} \frac{1}{\sqrt{N_j}}}$$
-  Trọng số này được đưa trực tiếp vào tham số `weight` của `nn.CrossEntropyLoss`, buộc mạng nơ-ron phải chịu phạt nặng khi dự đoán sai các nhãn thực thể hiếm.
+
+```math
+w_c = \frac{1}{\sqrt{N_c}} \times \frac{C}{\sum_{j=1}^{C} \frac{1}{\sqrt{N_j}}}
+```
+
+Trọng số này được đưa trực tiếp vào tham số `weight` của `nn.CrossEntropyLoss`, buộc mạng nơ-ron phải chịu phạt nặng khi dự đoán sai các nhãn thực thể hiếm.
 
 ### 4.3. Tối ưu hóa tham số (Optimization)
 * **Thuật toán**: `AdamW` với tốc độ học $\eta = 3 \times 10^{-5}$ và cơ chế suy giảm trọng số (weight decay) chống quá khớp.
@@ -178,7 +185,7 @@ Trong đó:
                                                                                 └────────────────────────┘
                                                                                             │
                                                                                             ▼
-[ Kafka UI : port 8080 ] ◄──────(Bản ghi sự kiện JSON chi tiết)─────────────── [ Topic: political_news_extracted ]
+[ Terminal Consumer Log ] ◄──(Bản ghi sự kiện JSON chi tiết)───────── [ Topic: political_news_extracted ]
 ```
 
 ### 6.2. Các thành phần trong phân hệ Streaming
@@ -186,7 +193,7 @@ Trong đó:
 1. **Hạ tầng Docker Compose (`docker-compose.yml`)**:
    * `kafka_broker` (Port 9092): Broker tiếp nhận, quản lý phân vùng (partitions) và lưu trữ tin nhắn.
    * `kafka_zookeeper` (Port 2181): Điều phối cụm và quản lý metadata của broker.
-   * `kafka_ui` (Port 8080): Bảng điều khiển trực quan theo dõi topics, consumer groups, message lag và payload.
+   * Tối ưu hóa tài nguyên phần cứng bằng cách chạy trực tiếp các container cốt lõi và theo dõi qua luồng log Terminal tiêu chuẩn.
 
 2. **Kafka Producer (`streaming/producer.py`)**:
    * Đọc tuần tự dữ liệu từ `data/dataset.json`.

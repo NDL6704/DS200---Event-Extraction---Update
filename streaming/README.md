@@ -1,17 +1,17 @@
-# 🚀 Module Streaming Thời Gian Thực - Event Extraction
+# Module Streaming Thoi Gian Thuc - Event Extraction
 
 Module này hiện thực hóa pipeline xử lý luồng (stream processing) thời gian thực cho bài toán **Trích xuất Sự kiện Tin tức Chính trị Việt Nam (Vietnamese Political Events Extraction)** sử dụng **Apache Kafka**, **Docker Compose**, và mô hình **Joint Learning (XLM-RoBERTa OneIE-based)**.
 
 ---
 
-## 🏛️ Kiến Trúc Hệ Thống (Pipeline Architecture)
+## 1. Kien Truc He Thong (Pipeline Architecture)
 
 ```
-[ dataset.json / Web Crawl ]
-            │
-            ▼
+[ data/dataset.json ]
+        │
+        ▼
 ┌───────────────────────┐
-│ streaming/producer.py │  ──(Mỗi 2-3s push 1 bài báo, UTF-8)──►  [ Kafka: political_news_raw ]
+│ streaming/producer.py │  ──(Moi 2-3s push 1 bai bao, UTF-8)──►  [ Kafka: political_news_raw ]
 └───────────────────────┘                                                      │
                                                                                ▼
                                                                   ┌─────────────────────────┐
@@ -28,72 +28,71 @@ Module này hiện thực hóa pipeline xử lý luồng (stream processing) th�
                                                                   └─────────────────────────┘
                                                                                │
                                                                                ▼
-[ Kafka UI : http://localhost:8080 ]  ◄──(Bản ghi sự kiện JSON)──  [ Kafka: political_news_extracted ]
+[ Terminal Consumer Log ] ◄──────(Ban ghi su kien JSON)─────────  [ Kafka: political_news_extracted ]
 ```
 
 ---
 
-## 📁 Cấu Trúc Thư Mục Liên Quan
+## 2. Cau Truc Thu Muc Lien Quan
 
 ```
 DS200/
 ├── data/
-│   └── dataset.json                # 5.814 bài báo mẫu đầu vào cho producer
+│   └── dataset.json                # 5.814 bai bao mau dau vao cho producer
 ├── models/
-│   ├── model.py                    # Kiến trúc OneIE JointModel (XLM-RoBERTa + 3 heads)
+│   ├── model.py                    # Kien truc OneIE JointModel (XLM-RoBERTa + 3 heads)
 │   ├── checkpoints/
-│   │   └── best_model.pt           # Checkpoint trọng số mô hình đã huấn luyện
-│   └── encoders/                   # 3 bộ mã hóa nhãn OneIE:
-│       ├── trigger_encoder.pkl     # 26 nhãn BIO cho Trigger
-│       ├── arg_encoder.pkl         # 7 nhãn BIO cho Argument
-│       └── event_encoder.pkl       # 14 nhãn Event Type
+│   │   └── best_model.pt           # Checkpoint trong so mo hinh da huan luyen
+│   └── encoders/                   # 3 bo ma hoa nhan OneIE:
+│       ├── trigger_encoder.pkl     # 26 nhan BIO cho Trigger
+│       ├── arg_encoder.pkl         # 7 nhan BIO cho Argument
+│       └── event_encoder.pkl       # 14 nhan Event Type
 ├── streaming/
-│   ├── producer.py                 # Đọc data/dataset.json & phát vào 'political_news_raw'
-│   ├── extractor.py                # Engine suy luận OneIE kết nối models/
-│   ├── consumer.py                 # Lắng nghe tin tức, trích xuất & đẩy sang 'political_news_extracted'
+│   ├── producer.py                 # Doc data/dataset.json & phat vao 'political_news_raw'
+│   ├── extractor.py                # Engine suy luan OneIE ket noi models/
+│   ├── consumer.py                 # Lang nghe tin tuc, trich xuat & day sang 'political_news_extracted'
 │   ├── __init__.py
-│   └── README.md                   # Hướng dẫn vận hành streaming
-├── docker-compose.yml              # Dựng Kafka broker, Zookeeper và Kafka UI (Port 8080)
-└── requirements.txt                # Danh sách dependencies chung
+│   └── README.md                   # Huong dan van hanh streaming
+├── docker-compose.yml              # Dung Kafka broker (Port 9092) va Zookeeper (Port 2181)
+└── requirements.txt                # Danh sach dependencies chung
 ```
 
 ---
 
-## 🛠️ Hướng Dẫn Vận Hành Từng Bước (Step-by-Step)
+## 3. Huong Dan Van Hanh Tung Buoc (Step-by-Step)
 
-### Bước 1: Cài đặt thư viện môi trường
-Từ thư mục gốc dự án, cài đặt các dependency:
+### Buoc 1: Cai dat thu vien moi truong
+Tu thu muc goc du an, cai dat cac dependency:
 ```bash
-pip install -r streaming/requirements.txt
+pip install -r requirements.txt
 ```
 
-### Bước 2: Khởi động Kafka Cluster & Kafka UI với Docker
-Mở terminal tại thư mục gốc dự án (`DS200`) và thực hiện:
+### Buoc 2: Khoi dong Kafka Cluster voi Docker
+Mo terminal tai thu muc goc du an (`DS200`) va thuc hien:
 ```bash
 docker compose up -d
 ```
-Kiểm tra trạng thái các container đang chạy:
+Kiem tra trang thai cac container dang chay:
 ```bash
 docker compose ps
 ```
-Bạn sẽ thấy 3 container:
+He thong se chay 2 container nhe va toi uu tai nguyen:
 - `kafka_zookeeper` (Port `2181`)
 - `kafka_broker` (Port `9092`)
-- `kafka_ui` (Port `8080`)
 
-### Bước 3: Mở Terminal 1 — Khởi chạy Consumer
-Chạy Consumer để sẵn sàng đón nhận dữ liệu và thực hiện suy luận mô hình:
+### Buoc 3: Mo Terminal 1 — Khoi chay Consumer
+Chay Consumer de san sang don nhan du lieu va thuc hien suy luan mo hinh:
 ```bash
 python streaming/consumer.py
 ```
-> **Log màn hình sẽ hiển thị trực tiếp theo đúng định dạng Event Extraction**:
+> Log man hinh se hien thi truc tiep theo dung dinh dang Event Extraction va cap nhat lien tuc theo thoi gian thuc:
 > ```json
-> --- Processed: Ban hành vị trí việc làm của đại biểu Quốc hội hoạ... ---
+> --- Processed: Ban hanh vi tri viec lam cua dai bieu Quoc hoi... ---
 > {
 >   "event_type": "Legislation",
 >   "entities": [
 >     {
->       "token": "Ủy",
+>       "token": "Uy",
 >       "trigger_tag": "O",
 >       "argument_tag": "B-Arg-Subject"
 >     },
@@ -108,62 +107,49 @@ python streaming/consumer.py
 >       "argument_tag": "O"
 >     },
 >     {
->       "token": "hành",
+>       "token": "hanh",
 >       "trigger_tag": "I-Legislation",
 >       "argument_tag": "O"
 >     }
 >   ]
 > }
-> 📊 [Kafka Routing] In: P0@O3 ➡️ Out: P0@O3 (284.0ms)
+> [Kafka Routing] In: P0@O3 -> Out: P0@O3 (284.0ms)
 > --------------------------------------------------
 > ```
 
-### Bước 4: Mở Terminal 2 — Khởi chạy Producer
-Mở một terminal mới song song và chạy Producer:
+### Buoc 4: Mo Terminal 2 — Khoi chay Producer
+Mo mot terminal moi song song va chay Producer:
 ```bash
 python streaming/producer.py
 ```
-> **Log màn hình sẽ hiển thị**:
-> - Đọc tự động các bài báo từ `dataset.json`.
-> - Gửi lần lượt từng bài báo theo chu kỳ ngẫu nhiên từ 2 đến 3 giây.
-> - In chi tiết ID bài báo, Partition, Offset gửi thành công.
-
-### Bước 5: Kiểm tra kết quả trực quan trên Kafka UI
-Mở trình duyệt web và truy cập địa chỉ:
-👉 **[http://localhost:8080](http://localhost:8080)**
-
-Tại giao diện Kafka UI:
-1. **Topics**:
-   - `political_news_raw`: Xem các bài báo thô liên tục được đẩy vào từ Producer.
-   - `political_news_extracted`: Xem các bản ghi sự kiện đã được Consumer phân tích và trích xuất.
-2. **Consumers**:
-   - Quan sát group `news_event_extraction_group` với tiến độ xử lý message lag = 0.
-3. **Messages**:
-   - Nhấp vào từng tin nhắn trong `political_news_extracted` để xem trực tiếp cấu trúc JSON chi tiết.
+> Log man hinh se hien thi:
+> - Doc tu dong cac bai bao tu `dataset.json`.
+> - Gui lan luot tung bai bao theo chu ky ngau nhien tu 2 den 3 giay.
+> - In chi tiet ID bai bao, Partition, Offset gui thanh cong.
 
 ---
 
-## 📋 Cấu Trúc Dữ Liệu (Payload Schema)
+## 4. Cau Truc Du Lieu (Payload Schema)
 
-### 1. Dữ liệu đầu vào: `political_news_raw`
+### 1. Du lieu dau vao: `political_news_raw`
 ```json
 {
   "article_id": "art_20240906_0001",
   "url": "https://baochinhphu.vn/...",
-  "title": "Quốc hội họp phiên toàn thể thông qua Nghị quyết mới",
-  "summary": "Chiều 20/6, tại Hội trường Ba Đình, Quốc hội đã biểu quyết thông qua Nghị quyết...",
+  "title": "Quoc hoi hop phien toan the thong qua Nghi quyet moi",
+  "summary": "Chieu 20/6, tai Hoi truong Ba Dinh, Quoc hoi da bieu quyet thong qua Nghi quyet...",
   "publish_date": "20/06/2024 16:40",
   "published_at": "2026-09-10T12:00:00.000000"
 }
 ```
 
-### 2. Dữ liệu đầu ra: `political_news_extracted`
+### 2. Du lieu dau ra: `political_news_extracted`
 ```json
 {
   "article_id": "art_20240906_0001",
   "source_url": "https://baochinhphu.vn/...",
-  "title": "Quốc hội họp phiên toàn thể thông qua Nghị quyết mới",
-  "original_summary": "Chiều 20/6, tại Hội trường Ba Đình, Quốc hội đã biểu quyết thông qua Nghị quyết...",
+  "title": "Quoc hoi hop phien toan the thong qua Nghi quyet moi",
+  "original_summary": "Chieu 20/6, tai Hoi truong Ba Dinh, Quoc hoi da bieu quyet thong qua Nghi quyet...",
   "publish_date": "20/06/2024 16:40",
   "processed_at": "2026-09-10T12:00:02.150000",
   "processing_time_ms": 128.5,
@@ -171,24 +157,24 @@ Tại giao diện Kafka UI:
     "event_type": "Legislation",
     "triggers": [
       {
-        "phrase": "thông qua",
+        "phrase": "thong qua",
         "type": "Legislation"
       }
     ],
     "arguments": {
       "subject": [
-        "Quốc hội"
+        "Quoc hoi"
       ],
       "location": [
-        "Hội trường Ba Đình"
+        "Hoi truong Ba Dinh"
       ],
       "time": [
-        "Chiều 20/6"
+        "Chieu 20/6"
       ]
     },
     "entities": [
       {
-        "token": "thông",
+        "token": "thong",
         "trigger_tag": "B-Legislation",
         "argument_tag": "O"
       },
@@ -204,36 +190,36 @@ Tại giao diện Kafka UI:
 
 ---
 
-## ⚙️ Các Tùy Chọn Tham Số Nâng Cao
+## 5. Cac Tuy Chon Tham So Nang Cao
 
-### Tùy chọn Producer (`streaming/producer.py`)
+### Tuy chon Producer (`streaming/producer.py`)
 ```bash
-# Đổi tần suất gửi (ví dụ: mỗi 1 đến 1.5 giây)
+# Doi tan suat gui (vi du: moi 1 den 1.5 giay)
 python streaming/producer.py --min-interval 1.0 --max-interval 1.5
 
-# Chỉ gửi 20 bài báo rồi dừng
+# Chi gui 20 bai bao roi dung
 python streaming/producer.py --limit 20
 
-# Chỉ định file dữ liệu khác
+# Chi dinh file du lieu khac
 python streaming/producer.py --data-path custom_news.json
 ```
 
-### Tùy chọn Consumer (`streaming/consumer.py`)
+### Tuy chon Consumer (`streaming/consumer.py`)
 ```bash
-# Đọc lại từ đầu toàn bộ các bài báo đã có trong topic
+# Doc lai tu dau toan bo cac bai bao da co trong topic
 python streaming/consumer.py --from-beginning
 
-# Giới hạn xử lý 10 bài báo rồi dừng
+# Gioi han xu ly 10 bai bao roi dung
 python streaming/consumer.py --max-messages 10
 ```
 
 ---
 
-## 🛑 Dừng Hệ Thống (Graceful Shutdown)
-- Trong terminal Producer hoặc Consumer, nhấn tổ hợp phím **`Ctrl + C`**. 
-- Hệ thống sẽ kích hoạt **Graceful Shutdown**: tự động xả hết các tin còn tồn trong buffer, cam kết offset cuối cùng và đóng kết nối an toàn.
-- Khi không sử dụng nữa, tắt hạ tầng Docker:
+## 6. Dung He Thong (Graceful Shutdown)
+- Trong terminal Producer hoac Consumer, nhan to hop phim **`Ctrl + C`**. 
+- He thong se kich hoat **Graceful Shutdown**: tu dong xa het cac tin con ton trong buffer, cam ket offset cuoi cung va dong ket noi an toan.
+- Khi khong su dung nua, tat ha tang Docker:
   ```bash
   docker compose down
   ```
-  *(Để xóa cả volume dữ liệu cũ: `docker compose down -v`)*
+  *(De xoa ca volume du lieu cu: `docker compose down -v`)*
