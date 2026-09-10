@@ -64,17 +64,18 @@ Hệ thống áp dụng kiến trúc **Joint Learning (OneIE-based)** nhằm gi�
    - Phân loại câu vào một trong 14 nhóm sự kiện chính trị (Celebration, Commemoration, Condolence, Cooperation, Diplomatic Reception, Government Formation, Inspection, Legislation, Meeting, Proposal, Publication, Recognition, Statement, Visiting).
 
 5. **Hàm mất mát liên kết (Weighted Multi-Task Loss)**:
-   - Huấn luyện kết hợp 3 nhánh mục tiêu thông qua hàm mất mát tổng hợp:
 
-   ```math
-   \mathcal{L}_{\text{total}} = 0.4 \times \mathcal{L}_{\text{trigger}} + 0.3 \times \mathcal{L}_{\text{argument}} + 0.3 \times \mathcal{L}_{\text{event}}
-   ```
+   Huấn luyện kết hợp 3 nhánh mục tiêu thông qua hàm mất mát tổng hợp:
+
+$$
+\mathcal{L}_{\text{total}} = 0.4 \times \mathcal{L}_{\text{trigger}} + 0.3 \times \mathcal{L}_{\text{argument}} + 0.3 \times \mathcal{L}_{\text{event}}
+$$
 
    - **Xử lý mất cân bằng lớp (Class Imbalance)**: Do nhãn `O` chiếm đa số (~95% lượng token), hàm mất mát sử dụng kỹ thuật tính trọng số nghịch đảo căn bậc hai tần suất (`calculate_class_weights`):
 
-   ```math
-   w_c = \frac{1}{\sqrt{N_c}} \times \frac{C}{\sum_{j=1}^{C} \frac{1}{\sqrt{N_j}}}
-   ```
+$$
+w_c = \frac{1}{\sqrt{N_c}} \times \frac{C}{\sum_{j=1}^{C} \frac{1}{\sqrt{N_j}}}
+$$
 
    giúp mô hình học hiệu quả các thẻ Trigger và Argument có tần suất xuất hiện thấp.
 

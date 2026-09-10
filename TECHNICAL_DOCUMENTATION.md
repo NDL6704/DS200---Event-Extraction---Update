@@ -122,9 +122,9 @@ Dự án triển khai mô hình **JointModel** lấy cảm hứng từ cấu tr�
 ### 4.1. Hàm mất mát liên kết đa nhiệm (Joint Multi-Task Loss)
 Hệ thống kết hợp ba hàm mất mát thành phần với trọng số tối ưu thực nghiệm:
 
-```math
+$$
 \mathcal{L}_{\text{total}} = 0.4 \times \mathcal{L}_{\text{trigger}} + 0.3 \times \mathcal{L}_{\text{arg}} + 0.3 \times \mathcal{L}_{\text{event}}
-```
+$$
 
 Trong đó:
 * $\mathcal{L}_{\text{trigger}}$ và $\mathcal{L}_{\text{arg}}$ là Cross-Entropy Loss tính trên các token hợp lệ (loại trừ padding với `ignore_index = -100`).
@@ -134,9 +134,9 @@ Trong đó:
 * **Thực trạng**: Trong tác vụ trích xuất thực thể, hơn 95% token trong văn bản mang nhãn `O` (Outside). Các nhãn quan trọng như `B-Arg-Time`, `B-Legislation` chỉ chiếm dưới 1%. Nếu huấn luyện thông thường, mô hình sẽ tối ưu cục bộ bằng cách dự đoán tất cả là `O`, dẫn đến F1-score của các thực thể gần bằng 0.
 * **Giải pháp**: Áp dụng kỹ thuật tính trọng số nghịch đảo căn bậc hai tần suất xuất hiện (`calculate_class_weights`):
 
-```math
+$$
 w_c = \frac{1}{\sqrt{N_c}} \times \frac{C}{\sum_{j=1}^{C} \frac{1}{\sqrt{N_j}}}
-```
+$$
 
 Trọng số này được đưa trực tiếp vào tham số `weight` của `nn.CrossEntropyLoss`, buộc mạng nơ-ron phải chịu phạt nặng khi dự đoán sai các nhãn thực thể hiếm.
 
