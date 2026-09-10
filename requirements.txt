@@ -1,0 +1,19 @@
+# Streaming Module Dependencies for Vietnamese Political News Event Extraction
+
+# Kafka Streaming Client (Python 3.12 compatible)
+kafka-python-ng>=2.2.2
+
+# Deep Learning & Transformers Backbone
+torch>=2.0.0
+transformers>=4.30.0
+sentencepiece>=0.1.99
+
+# Data Processing & ML Encoders
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Optional Web Crawling & Utilities
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+tqdm>=4.65.0
