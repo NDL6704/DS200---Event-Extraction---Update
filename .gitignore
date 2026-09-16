@@ -54,3 +54,7 @@ models/checkpoints/*.ckpt
 
 # Personal documentation / notes
 TECHNICAL_DOCUMENTATION.md
+
+# Redundant / legacy data exports
+archive/legacy_data/results_streaming_copy.csv
+*.xlsx
