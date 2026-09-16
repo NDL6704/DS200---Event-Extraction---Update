@@ -51,3 +51,6 @@ models/checkpoints/*.ckpt
 # Logs and Environment variables
 *.log
 .env
+
+# Personal documentation / notes
+TECHNICAL_DOCUMENTATION.md
